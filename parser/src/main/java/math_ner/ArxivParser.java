@@ -1,9 +1,11 @@
 package math_ner;
 
+import java.io.BufferedInputStream;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.Properties;
 
 import javax.xml.stream.XMLEventReader;
 import javax.xml.stream.XMLInputFactory;
@@ -20,11 +22,18 @@ import com.mongodb.Mongo;
 
 public class ArxivParser {
 
-	private static final String COLLECTION = "raw";
+	private static int port = 27017;
+	private static String server = "localhost";
+	private static String collectionname = "raw";
+	private static String dbname ="math-ner";
+	private static Boolean auth = false;
+	private static String user ="";
+	private static String pw ="";
+	
 	private static final String DESCRIPTION = "description";
 	private static final String SUBJECT = "subject";
 	private static final String RECORD = "record";
-	private static final String DBNAME ="test";
+	
 	/**
 	 * @param args
 	 */
@@ -39,10 +48,29 @@ public class ArxivParser {
 		
 		System.out.println("Start importing....");
 			
+		Mongo mongo;
 		try {
-			Mongo mongo = new Mongo();
-			DB database = mongo.getDB(DBNAME);
-			DBCollection collection = database.getCollection(COLLECTION);
+			if(args.length > 1) {
+				Properties properties = new Properties();
+				BufferedInputStream stream;
+				stream = new BufferedInputStream(new FileInputStream(args[1]));
+				properties.load(stream);
+				stream.close();
+				port = Integer.valueOf( properties.getProperty("port"));
+				server = properties.getProperty("server");
+				collectionname = properties.getProperty("collection");
+				dbname =properties.getProperty("dbname");
+				user = properties.getProperty("user");
+				pw =properties.getProperty("pw");
+				auth = Boolean.valueOf(properties.getProperty("auth"));
+				}
+			
+			
+			mongo = new Mongo(server,port);
+			DB database = mongo.getDB(dbname);
+			if (auth)
+				database.authenticate(user, pw.toCharArray());
+			DBCollection collection = database.getCollection(collectionname);
 			
 			in = new FileInputStream(args[0]);
 			XMLEventReader eventReader = inputFactory.createXMLEventReader(in);
