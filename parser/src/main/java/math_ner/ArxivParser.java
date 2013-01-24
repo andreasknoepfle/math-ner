@@ -82,25 +82,37 @@ public class ArxivParser {
 
 			        if (event.isStartElement()) {
 			          StartElement startElement = event.asStartElement();
-			          if (startElement.getName().getLocalPart() == (DESCRIPTION)) {
+			          if (startElement.getName().getLocalPart().equals(DESCRIPTION)) {
 			        	  if(description == null)
 			        		  description = eventReader.getElementText();
 			          }
-			          if (startElement.getName().getLocalPart() == (SUBJECT)) {
-			        	  subject = eventReader.getElementText();
+			          if (startElement.getName().getLocalPart().equals(SUBJECT)) {
+			        	  if(subject == null)
+			        	  {
+			        		  subject = eventReader.getElementText();
+			        		 if(!subject.toLowerCase().contains("math")) {
+			        			 subject=null;
+			        		 }
+			        	  }
 			        	  
+			          }
+			          if (startElement.getName().getLocalPart().equals(RECORD)) {
+			        	  description = null;
+			        	  subject = null;
 			          }
 			        }
 			        
 			        if (event.isEndElement()) {
 			            EndElement endElement = event.asEndElement();
 			            if (endElement.getName().getLocalPart() == (RECORD)) {
-			             	if(subject.toLowerCase().contains("math")) {
-			             		i++;
+			             	if(subject != null && subject.toLowerCase().contains("math")) {
+			             		
 			             		if(description != null) {
 			             			BasicDBObject doc = new BasicDBObject("text", description).append("subject",subject);
 			             			collection.insert(doc);
 				             		description = null;
+				             		subject = null;
+				             		i++;
 			             		}
 			             	}
 			            }
