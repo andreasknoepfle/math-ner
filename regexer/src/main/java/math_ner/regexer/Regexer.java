@@ -16,12 +16,14 @@ import com.mongodb.DBCursor;
 import com.mongodb.DBObject;
 import com.mongodb.Mongo;
 
+import edu.stanford.nlp.ling.CoreLabel;
 import edu.stanford.nlp.ling.HasWord;
 import edu.stanford.nlp.ling.Label;
 import edu.stanford.nlp.ling.Sentence;
 import edu.stanford.nlp.ling.Word;
 import edu.stanford.nlp.parser.lexparser.LexicalizedParser;
 import edu.stanford.nlp.process.DocumentPreprocessor;
+import edu.stanford.nlp.process.PTBTokenizer;
 import edu.stanford.nlp.trees.Tree;
 
 
@@ -65,19 +67,37 @@ public class Regexer
 			if (auth)
 				database.authenticate(user, pw.toCharArray());
 			DBCollection collection = database.getCollection(collectionname);
-			DBObject query = new BasicDBObject("text", new BasicDBObject("$exists", true));
+			DBObject query = new BasicDBObject("annotated", new BasicDBObject("$exists", true));
 			 DBCursor cursor = collection.find(query);
 			 while( cursor.hasNext() ) {
 				 DBObject obj = cursor.next();
         
 				       
 				        DocumentPreprocessor dp= new DocumentPreprocessor(new StringReader((String) obj.get("text")));
+				        dp.setTokenizerFactory(PTBTokenizer.PTBTokenizerFactory.newPTBTokenizerFactory(false,true) );
+				        StringBuilder regexed = new StringBuilder();
 				        for (List<HasWord> list : dp) {
 				             Tree parse = lp.apply(list);
-				             String s =Sentence.listToString(labelTree(parse));
-				             //Write s to regexed
+				             ArrayList<Label> labels= labelTree(parse,true);
 				            
+				             for (Label label : labels) {
+								if(label instanceof CoreLabel) {
+									regexed.append(((CoreLabel) label).originalText()+((CoreLabel) label).after());
+								} else {
+									regexed.append(label.value());
+								}
+							}
+				             //Write s to regexed
+				             
+				             //Go for garbage
+				            
+				             System.gc();
 						}
+				        obj.put("regexed", regexed.toString());
+				        collection.save(obj);
+				        System.out.println(".");
+				       
+				        
 			 }
 		} catch (UnknownHostException e) {
 			// TODO Auto-generated catch block
@@ -96,7 +116,7 @@ public class Regexer
     }
     
     
-    public static ArrayList<Label> labelTree(Tree tree) {
+    public static ArrayList<Label> labelTree(Tree tree,boolean firstWord) {
     	ArrayList<Label> sentance = new ArrayList<Label>();
     	List<Tree> children = tree.getChildrenAsList();
     	for (Tree child : children) {
@@ -104,29 +124,36 @@ public class Regexer
 				sentance.addAll(child.yield());
 			} else if(child.value().equals("NP")) {
 				//Found a Nounphrase
-				sentance.addAll(regexTree(child));
+				sentance.addAll(regexTree(child,firstWord));
 			} else {
-				sentance.addAll(labelTree(child));
+				if(checkNP(child)) {
+					// NP hidden deeper
+					sentance.addAll(labelTree(child,firstWord));
+				} else {
+					// No NP hidden
+					sentance.addAll(child.yield());
+				}
 			}
+			firstWord = false;
 		}
     	return sentance;
     	
     }
 
 
-	private static ArrayList<Label> regexTree(Tree child) {
+	private static ArrayList<Label> regexTree(Tree child,boolean firstWord) {
 		// Scan for deeper NPs 
 		
 		if(checkNP(child)) {
 				//Continue Labeling
-				return labelTree(child);
+				return labelTree(child,firstWord);
 		}
 		
 	
 		ArrayList<Label> list=child.yield();
 		String part = Sentence.listToString(list);
 		
-		if(regexNP(part)) {
+		if(regexNP(part,firstWord)) {
 			if(child.getChildrenAsList().get(0).value().equals("DT")) {
 				//Trim Articles
 				list.add(1, new Word(TAG_NAME_MATH_VALUE_START));
@@ -141,10 +168,22 @@ public class Regexer
 	}
 
 
-	private static boolean regexNP(String part) {
+	private static boolean regexNP(String part, boolean firstWord) {
 		// Simple Name Regex Matcher
 		if(part.matches(".*[A-Z][a-z]{3}.*")) {
-			return true;
+			if(part.matches("[A-Z].*") && firstWord) {
+				// This is only the start of a sentence
+				return false;
+			}
+			if(part.matches(".*[A-Z][a-z]{3}[a-z]*('s)?\\s[a-z]{4}.*")) {
+				// We have a Name with a subject near
+				return true;
+			}
+			if(part.matches(".*[a-z]{4}[a-z]*\\s[A-Z][a-z]{3}[a-z]*.*")) {
+				// We have a Name with a subject near
+				return true;
+			}
+			
 		}
 		return false;
 	}
