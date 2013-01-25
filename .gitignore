@@ -4,7 +4,14 @@
 target/
 *.class
 xml_archive/
-
+*.txt
+*.tok
+*.tsv
+*.ser.gz
 # Package Files #
 *.war
 *.ear
+*.jar
+lemma.prop
+connection.properties
+
