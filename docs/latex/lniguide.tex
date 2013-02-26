@@ -5,7 +5,7 @@
 \usepackage{graphicx}
 
 \author{Andreas Knöpfle \& Tobias Schmid \\\\andreas.knoepfle@fu-berlin.de, tobias.schmid@fu-berlin.de}
-\title{Eigennamenerkennung in mathematischen Texten}
+\title{Erkennung von Eigennamen in mathematischen Texten}
 \begin{document}
 \maketitle
 
@@ -14,32 +14,81 @@ abstract
 \end{abstract}
 
 \tableofcontents
-
+\newpage
 \section{Einleitung}
 
+\newpage
 \section{Grundlagen}
 In mathematischen Texten können Standart-Tools zur Erkennung von Eigennamen, wie die von Personen, Organisationen oder Orten nicht verwendet werden, da die in die Mathematik eigene Eigennamen definiert. Beispielsweise gibt es Formeln, Gleichungen oder Theoreme wie z.B. Satz des Pythagoras oder das Bayestheorem, die eigene Namen tragen und oft in mathematischen Texten vorkommen. Die Erkennung dieser Eigennamen wurde in dieser Arbeit mit zwei unterschiedlichen Ansätzen implementiert:
 \begin{itemize}
 	\item Regelbasierte Erkennung 
 	\item Maschinelles Lernen
 \end{itemize}
-Bestehende Werkzeuge zur Eigennamenerkennung können zusätzlich zur eigentlichen Erkennung der Eigennamen Label vergeben, die die Erkannten Eigennamen typisieren (z.B. erhalten erkannte Personennamen ein Person-Label). Da es aber in der Mathematik sehr viele verschiedene Konzepte gibt und sich die mathematischen Eigennamen oft vielen Konzepten zuordnen lassen, wurde in dieser Arbeit auf eine zusätzliche Labelung der Eigenamen verzichtet. Die implementierten Ansätze verwenden daher jeweils ein gemeinsames Label "MATH" für mathematische Entitäten.
-\subsection{Architektur}
+Bestehende Werkzeuge zur Eigennamenerkennung können zusätzlich zur eigentlichen Erkennung der Eigennamen Label vergeben, die die Erkannten Eigennamen typisieren (z.B. erhalten erkannte Personennamen ein Person-Label). Da es aber in der Mathematik sehr viele verschiedene Konzepte gibt und sich die mathematischen Eigennamen oft vielen Konzepten zuordnen lassen, wurde in dieser Arbeit auf eine zusätzliche Labelung der Eigenamen verzichtet. Die implementierten Ansätze verwenden daher jeweils ein gemeinsames Label ''MATH'' für mathematische Entitäten.
 
-\begin{figure}
+\subsection{Regelbasierte Erkennung}
+\begin{figure}[ht!]
+\caption{Treebank Beispiel\label{penn}}
+\small
+\begin{verbatim}
+(ROOT
+  (S
+    (PP (IN In)
+      (ADJP (JJ particular)))
+    (, ,)
+    (NP (PRP$ our) (JJ colored) (NNS pebbles))
+    (VP
+      (VP (VB generalize)
+        (CC and)
+        (VB strengthen)
+        (NP
+          (NP (DT the) (JJ previous) (NNS results))
+          (PP (IN of)
+            (NP (NNP Lee)
+              (CC and)
+              (NNP Streinu)))))
+      (CC and)
+      (VP (VB give)
+        (NP
+          (NP (DT a) (JJ new) (NN proof))
+          (PP (IN of)
+            (NP
+              (NP (DT the) (NNP Tutte-Nash-Williams) 
+              	   (NN characterization))
+              (PP (IN of)
+                (NP (NN arboricity))))))))
+    (. .)))
+\end{verbatim}
+
+\end{figure}
+\normalsize
+
+Das Erkennen der Eigennamen über reguläre Ausdrücken über einen längeren Text erfordert Satzbasierte Ausdrücke, die zusätzlich die Grammatik des Satzes einbeziehen. Dies führt zu sehr komplexen regulären Ausdrücken und erschwert das Erkennen der Eigennamen zusätzlich. Da Eigennamen immer nur in Nominalphrasen vorkommen, können die regulären Ausdrücke durch Vorverarbeitung des Textes wesentlich vereinfacht werden. Dazu wurde in dieser Arbeit der "Lexical Parser" der Stanford Natural Language Processing Group\footnote{http://nlp.stanford.edu/software/lex-parser.shtml} verwendet. 
+\\
+Dieser Parser baut einen Parse-Baum auf, der die syntaktische Struktur des eingegebenen Textes analysiert und den Text entsprechend annotiert. Dabei werden jedes Wort, zusammengehörige Wortgruppen und Satzteile annotiert. 
+Abbildung \ref{penn} zeigt einen Beispielsatz der mit dem "Lexical Parser" analysiert und im Penn-Treebank Format\footnote{http://www.cis.upenn.edu/~treebank/} ausgegeben wurde.
+
+Im Beispiel sind mehrere Nominalphrasen, wobei der Ausdruck  
+\small
+\begin{verbatim}(NP (DT the) (NNP Tutte-Nash-Williams) (NN characterization))
+\end{verbatim} 
+\normalsize
+einen mathematischen Eigennamen enthält. 
+Für die Erkennung der Eigennamen werden die durch den "Lexical Parser" erkannten Nominalphrasen mit Hilfe von Regulären Ausdrücken analysiert. Passt ein regulärer Ausdruck kann die erkannte Nominalphrase im Text als Eigenname annotiert werden. Beim Annotieren werden zusätzlich vorrausgehende Artikel abgeschnitten.\\
+Die regulären Ausdrücke sind dabei sehr einfach aufgebaut und suchen nach großgeschriebenen Wörtern, die zusammen mit einem oder mehreren kleingeschriebenen Wörtern (die keine Artikel oder Präpositionen sind) zusammen vorkommen.
+\subsection{Erkennung mit maschinellem Lernen}
+Für die Erkennung von mathematischen Eigennamen mit maschinellem Lernen wurde die Stanford Named Entity Recognition der Stanford Natural Language Processing Group\footnote{http://nlp.stanford.edu/ner/index.shtml} verwendet. \\
+Bevor die mathematische Eigennamen erkannt werden können muss zunächst
+\subsection{Datensatz}
+
+\subsection{Architektur}
+lala
+\begin{figure}[ht!]
   \begin{center}
   	\includegraphics[width=0.7\textwidth]{image/arch.jpg}
   	\caption{Architektur der Evaluationsumgebung\label{arch}}
   \end{center}
 \end{figure}
-
-
-\subsection{Regelbasierte Erkennung}
-
-\subsection{Erkennung mit maschinellem Lernen}
-
-\subsection{Datensatz}
-
 
 \subsection{Evaluationsmethoden}
 
