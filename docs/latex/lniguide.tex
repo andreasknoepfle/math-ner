@@ -3,6 +3,7 @@
 \IfFileExists{latin1.sty}{\usepackage{latin1}}{\usepackage{isolatin1}}
 
 \usepackage{graphicx}
+\usepackage{color}
 
 \author{Andreas Knöpfle \& Tobias Schmid \\\\andreas.knoepfle@fu-berlin.de, tobias.schmid@fu-berlin.de}
 \title{Eigennamenerkennung in mathematischen Texten}
@@ -48,19 +49,88 @@ Bestehende Werkzeuge zur Eigennamenerkennung können zusätzlich zur eigentlichen 
 
 \subsection{Evaluationsmethoden}
 
+Für die Evaluation der Ergebnisse werden drei Maße verwendet:
+
+\(Precision = \frac{Anzahl richtig getaggte Woerter}{Anzahl getaggte Woerter}\) 
+
+\(Recall = \frac{Anzahl richtig getaggte Woerter}{Anzahl richtig getaggte Woerter + Anzahl nicht gefundene Woerter}\) 
+
+\(F1 = 2 \cdot \frac{Precision \cdot Recall}{Precision + Recall}\)
+
+
+
 \section{Analyse}
 
 \subsection{Ergebnisse der Regelbasierte Erkennung}
 
+Mit der Implementierung der regelbasierten Erkennung wurden folgende Ergebnisse erzielt:
+\begin{list}{}{}
+\item Precision:		95.27\% 
+\item Recall:		49.55\% 
+\item FB1-Maß:			57.97 
+\end{list}
+
+Folgende Details liegen diesem Ergebnis zu grunde:
+\begin{list}{}{}
+\item Anzahl Wörter in Testdatei:     	10077
+\item Anzahl Wörter mit Tags:               664
+\item Anzahl NER-getaggte Wörter:           471
+\item Anzahl richtig NER-getaggte Wörter:   329
+\end{list}
+
 \subsubsection*{Nicht erkannte Eigennamen}
 
+
 \subsubsection*{Falsch erkannte Eigennamen}
+
+
 
 \subsection{Ergebnisse der Erkennung mit maschinellem Lernen}
 
+Mit der Implementierung der Erkennung mit maschinellem Lernen wurden folgende Ergebnisse erzielt:
+\begin{list}{}{}
+\item Precision:		90.36\% 
+\item Recall:		64.13\% 
+\item FB1-Maß:		75.02
+\end{list}
+
+Folgende Details liegen diesem Ergebnis zu grunde:
+\begin{list}{}{}
+\item Anzahl Wörter in Testdatei:            11240
+\item Anzahl Wörter mit Tags:                658
+\item Anzahl NER-getaggte Wörter:            467
+\item Anzahl richtig NER-getaggte Wörter:    422
+\end{list}
+
 \subsubsection*{Nicht erkannte Eigennamen}
 
+There are 7622 isomorphism classes of smooth {\color{red}Fano polytopes} and 72256 isomorphism(...)
+
+(...) quasi-isometric to {\color{red}Euclidean spaces} of arbitrary dimension ....
+
+(...) is constructed based on {\color{red}L. Bers' theory of formal powers}.
+
+(...) for the affine {\color{red}Weyl group symmetry}.   
+
+(...) of equivariant {\color{green}Schubert classes} on {\color{red}Grassmannians} which implies(...)
+
+(...) of the Fourier coefficients of {\color{green}Siegel modular} {\color{red}forms} on {\color{red}Maass Space} are obtained (...)
+
+(...) modeling a {\color{green}Non-Newtonian fluid} {\color{red}of polymer aqueous solutions}.
+
+(...) recall a {\color{red}theorem of Cantor} that (...) 
+
 \subsubsection*{Falsch erkannte Eigennamen}
+
+(...) the dual {\color{green}Feynman transform} {\color{red}whose algebras} are not necessarily (...)
+
+(...) where {\color{green}Mathai's entropy} {\color{red}leads} to pathway (...)
+
+(...) pricing continuous arithmetic average {\color{red}Asian options} in the (...)
+
+(...) of the bacteria {\color{red}Staphylococcus aureus} in intermediate moisture (...)
+
+(...) Food scientists at the {\color{red}U.S. Army's Natick Solider Center have} developed a model (...)
 
 \section{Fazit}
 
