@@ -15,6 +15,7 @@ abstract
 
 \tableofcontents
 \newpage
+\pagestyle{plain}
 \section{Einleitung}
 
 \newpage
@@ -27,6 +28,7 @@ In mathematischen Texten können Standart-Tools zur Erkennung von Eigennamen, wie
 Bestehende Werkzeuge zur Eigennamenerkennung können zusätzlich zur eigentlichen Erkennung der Eigennamen Label vergeben, die die Erkannten Eigennamen typisieren (z.B. erhalten erkannte Personennamen ein Person-Label). Da es aber in der Mathematik sehr viele verschiedene Konzepte gibt und sich die mathematischen Eigennamen oft vielen Konzepten zuordnen lassen, wurde in dieser Arbeit auf eine zusätzliche Labelung der Eigenamen verzichtet. Die implementierten Ansätze verwenden daher jeweils ein gemeinsames Label ''MATH'' für mathematische Entitäten.
 
 \subsection{Regelbasierte Erkennung}
+\label{regex}
 \begin{figure}[ht!]
 \caption{Treebank Beispiel\label{penn}}
 \small
@@ -77,21 +79,35 @@ einen mathematischen Eigennamen enthält.
 Für die Erkennung der Eigennamen werden die durch den "Lexical Parser" erkannten Nominalphrasen mit Hilfe von Regulären Ausdrücken analysiert. Passt ein regulärer Ausdruck kann die erkannte Nominalphrase im Text als Eigenname annotiert werden. Beim Annotieren werden zusätzlich vorrausgehende Artikel abgeschnitten.\\
 Die regulären Ausdrücke sind dabei sehr einfach aufgebaut und suchen nach großgeschriebenen Wörtern, die zusammen mit einem oder mehreren kleingeschriebenen Wörtern (die keine Artikel oder Präpositionen sind) zusammen vorkommen.
 \subsection{Erkennung mit maschinellem Lernen}
+\label{mach-lern}
 Für die Erkennung von mathematischen Eigennamen mit maschinellem Lernen wurde die Stanford Named Entity Recognition der Stanford Natural Language Processing Group\footnote{http://nlp.stanford.edu/ner/index.shtml} verwendet. \\
-Bevor die mathematische Eigennamen erkannt werden können muss zunächst
+Bevor die mathematische Eigennamen erkannt werden können muss zunächst ein so genannter Korpus trainiert werden. Dafür benötigt man eine große Menge bereits von Textdaten mit annotierten Eigennamen. Mit einem Korpus der auf diese Weise trainiert wurde kann man anschließen auch neue Texte annotieren. \\
+\begin{figure}[ht!]
+  \begin{center}
+  	\includegraphics[width=0.7\textwidth]{image/annotate.jpg}
+  	\caption{Stanford simple manual annotation tool\label{annotate}}
+  \end{center}
+\end{figure}
+Für das Annotieren der Trainingsdaten wurde das Stanford Annotation Tool\footnote{http://nlp.stanford.edu/software/stanford-manual-annotation-tool-2004-05-16.tar.gz} verwendet (siehe Abbildung \ref{annotate}). Dies ermögliche eine einfache Annotation von Eigennamen in Texten mit Hilfe von XML-Tags. 
 \subsection{Datensatz}
-
+Als Datensatz für die Evaluation und das Trainieren des maschinellen Lernens wurden Abstracts aus dem Arxiv.org-Datensatz\footnote{http://arxiv.org/} verwendet. Der Datensatz enthält Abstarcts aus den Themen Physik, Mathematik, Computer Science, Quantitative Biology, Quantitative Finance und Statistik. Für diese Arbeit wurden lediglich die Abstrakts verwendet, deren Thema in die Mathematik fällt. Der Arxiv Datensatz enthielt zum Zeitpunkt des Verfassens dieser Arbeit 145.800 Abstracts aus der Mathematik. Als Datenquelle wurde die XML-Version des Datensatzes verwendet.
 \subsection{Architektur}
-lala
+Zur Zwischenspeicherung der Abstarcts mit verschiedenen Annotationen verwendet die Implementierung die dokumentorientierte Datenbank MongoDB\footnote{http://www.mongodb.org/}. Jeweils ein MongoDB-Dokument enthält das Abstract in Rohform, die manuell annotierte Version des Abstracts (falls vorhanden) und das Ergebnis des Regelbasierten Verfahrens. 
 \begin{figure}[ht!]
   \begin{center}
   	\includegraphics[width=0.7\textwidth]{image/arch.jpg}
   	\caption{Architektur der Evaluationsumgebung\label{arch}}
   \end{center}
 \end{figure}
-
+Abbildung \ref{arch} zeigt die grundsätzliche Architektur der Evaluationsumgebung. Der XML-Datensatz von arxiv.org wird mit Hilfe eines eigens entwickelten Parsers in die MongoDB-Datenbank importiert. Mit Hilfe einer modifizierten Version des Stanford Annotation Tools (siehe Abschnitt \ref{mach-lern}), in der Abbildung als ''Tagger'' gekennzeichnet, können annotierte Versionen der Abstracts erstellt werden. Das Modul zum annotieren der Eigennamen durch reguläre Ausdrücke, in der Abbildung als ''Regexer'' gekennzeichnet, kann ebenfalls annotierte Versionen der Abstracts erzeugen (siehe Abschnitt \ref{regex}). Dabei wird in beiden Fällen XML-annotierter Text erzeugt. \\Für das trainieren der Stanford Named Entity Recognition müssen die  XML-annotierten Texte in TSV-Format konviertiert werden, wobei eine Zeile immer ein Wort und das verwendete Label (in diesem Fall ''MATH'') oder ein Null-Label enthält. Diese Konvertierung kann durch das hier in der Abbildung als ''Converter'' bezeichnete Modul ausgeführt werden. \\
+Zur Evaluierung der Verfahren wird das Perl-Skript ''colleval''\footnote{http://www.cnts.ua.ac.be/conll2000/chunking/conlleval.txt} verwendet. Dies erwartet ebenfalls ein TSV-Format, allerdings mit zwei Labeln pro Zeile (erwartetes Label und erkanntes Label). Diese Konvertierung kann durch das hier in der Abbildung als ''Eval'' bezeichnete Modul ausgeführt werden und verbindet die manuell annotierten Daten mit den Ergebnissen aus den jeweiligen Verfahren. \\
 \subsection{Evaluationsmethoden}
-
+\begin{figure}[ht!]
+  \begin{center}
+  	\includegraphics[width=1.0\textwidth]{image/eval.jpg}
+  	\caption{Datenfluss der Evaluationsumgebung\label{eval}}
+  \end{center}
+\end{figure}
 \section{Analyse}
 
 \subsection{Ergebnisse der Regelbasierte Erkennung}
