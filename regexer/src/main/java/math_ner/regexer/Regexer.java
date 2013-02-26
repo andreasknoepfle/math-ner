@@ -67,8 +67,9 @@ public class Regexer
 			if (auth)
 				database.authenticate(user, pw.toCharArray());
 			DBCollection collection = database.getCollection(collectionname);
-			DBObject query = new BasicDBObject("annotated", new BasicDBObject("$exists", true));
+			DBObject query = new BasicDBObject("annotated", new BasicDBObject("$exists", false)).append("regexed", new BasicDBObject("$exists", false));
 			 DBCursor cursor = collection.find(query);
+			 int count= 0;
 			 while( cursor.hasNext() ) {
 				 DBObject obj = cursor.next();
         
@@ -78,6 +79,7 @@ public class Regexer
 				        StringBuilder regexed = new StringBuilder();
 				        for (List<HasWord> list : dp) {
 				             Tree parse = lp.apply(list);
+				             parse.pennPrint();
 				             ArrayList<Label> labels= labelTree(parse,true);
 				            
 				             for (Label label : labels) {
@@ -95,7 +97,7 @@ public class Regexer
 						}
 				        obj.put("regexed", regexed.toString());
 				        collection.save(obj);
-				        System.out.println(".");
+				        System.out.println(++count);
 				       
 				        
 			 }
@@ -161,7 +163,7 @@ public class Regexer
 				list.add(0, new Word(TAG_NAME_MATH_VALUE_START));
 			}
 			list.add(new Word(TAG_NAME_MATH_VALUE_END));
-			System.out.println( Sentence.listToString(list));
+			//System.out.println( Sentence.listToString(list));
 		}
 		
 		return list;
