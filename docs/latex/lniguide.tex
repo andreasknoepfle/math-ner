@@ -5,7 +5,7 @@
 \usepackage{graphicx}
 
 \author{Andreas Knöpfle \& Tobias Schmid \\\\andreas.knoepfle@fu-berlin.de, tobias.schmid@fu-berlin.de}
-\title{Erkennung von Eigennamen in mathematischen Texten}
+\title{Eigennamenerkennung in mathematischen Texten}
 \begin{document}
 \maketitle
 
@@ -16,7 +16,12 @@ abstract
 \tableofcontents
 \newpage
 \pagestyle{plain}
+
 \section{Einleitung}
+
+Mit Hilfe einer Eigennamenerkennung ist es möglich Eigennamen in Texten zu finden. Es könnte beispielsweise interessant sein alle Personennamen in einem Text zu finden, um schnell herauszufinden, um wen es in diesem Text geht. Unterschiedliche Domänen haben meist auch unterschiedliche Eigennamen. In den einzelnen Domänen, wie z.B. die Mathematik, entstehen Eigennamen auf unterschiedliche Weisen. Wenn beispielsweise ein bekannter Mathematiker einen neuen Algorithmus entwickelt, so wird dieser oft nach dem Namen des Mathematikers benannt. Jedoch gibt es in den meisten Fällen keine eindeutigen Regeln, nach welchen Eigennamen entstehen und es ist somit nicht trivial diese Eigennamen in Texten zu finden. Eine Eigennamenerkennung aus einer bestimmten Domäne (z.B. die Biologie), funktioniert vermutlich auch nicht problemlos in einer anderen Domäne.\\
+
+Es gibt schon verschiedene Eigennamenerkennungen in unterschiedlichen Domänen. Jedoch gibt es auch einige Domänen, für welche es noch keine bzw. nur ungenügend zufriedenstellende Eigennamenerkennungen gibt. Eine Domäne für welche es noch keine zufriedenstellende Eigennamenerkennung gibt, ist die Mathematik, mit welcher sich dieser Artikel beschäftigt.
 
 \newpage
 \section{Grundlagen}
@@ -101,6 +106,7 @@ Zur Zwischenspeicherung der Abstarcts mit verschiedenen Annotationen verwendet d
 \end{figure}
 Abbildung \ref{arch} zeigt die grundsätzliche Architektur der Evaluationsumgebung. Der XML-Datensatz von arxiv.org wird mit Hilfe eines eigens entwickelten Parsers in die MongoDB-Datenbank importiert. Mit Hilfe einer modifizierten Version des Stanford Annotation Tools (siehe Abschnitt \ref{mach-lern}), in der Abbildung als ''Tagger'' gekennzeichnet, können annotierte Versionen der Abstracts erstellt werden. Das Modul zum annotieren der Eigennamen durch reguläre Ausdrücke, in der Abbildung als ''Regexer'' gekennzeichnet, kann ebenfalls annotierte Versionen der Abstracts erzeugen (siehe Abschnitt \ref{regex}). Dabei wird in beiden Fällen XML-annotierter Text erzeugt. \\Für das trainieren der Stanford Named Entity Recognition müssen die  XML-annotierten Texte in TSV-Format konviertiert werden, wobei eine Zeile immer ein Wort und das verwendete Label (in diesem Fall ''MATH'') oder ein Null-Label enthält. Diese Konvertierung kann durch das hier in der Abbildung als ''Converter'' bezeichnete Modul ausgeführt werden. \\
 Zur Evaluierung der Verfahren wird das Perl-Skript ''colleval''\footnote{http://www.cnts.ua.ac.be/conll2000/chunking/conlleval.txt} verwendet. Dies erwartet ebenfalls ein TSV-Format, allerdings mit zwei Labeln pro Zeile (erwartetes Label und erkanntes Label). Diese Konvertierung kann durch das hier in der Abbildung als ''Eval'' bezeichnete Modul ausgeführt werden und verbindet die manuell annotierten Daten mit den Ergebnissen aus den jeweiligen Verfahren. \\
+
 \subsection{Evaluationsmethoden}
 \begin{figure}[ht!]
   \begin{center}
