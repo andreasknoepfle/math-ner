@@ -3,15 +3,15 @@
 \IfFileExists{latin1.sty}{\usepackage{latin1}}{\usepackage{isolatin1}}
 
 \usepackage{graphicx}
-\usepackage{color}
+\usepackage[usenames,dvipsnames]{xcolor}
 
 \author{Andreas Knöpfle \& Tobias Schmid \\\\andreas.knoepfle@fu-berlin.de, tobias.schmid@fu-berlin.de}
-\title{Eigennamenerkennung in mathematischen Texten}
+\title{Erkennung von Eigennamen in mathematischen Texten}
 \begin{document}
 \maketitle
 
 \begin{abstract}
-abstract
+In dieser Arbeit werden zwei verschiedene Ansätze für die Erkennung von Eigennamen in mathematischen Texten vorgestellt. Das erste Verfahren arbeitet mit Regulären Ausdrücken unter Zuhilfenahme der sprachlichen Syntax der Texte. Das zweite Verfahren arbeitet mit maschinellem Lernen. Beide Verfahren werden getrennt evaluiert. Im anschließenden Fazit werden die Verbesserungspotenziale beider Verfahren und mögliche Erweiterungen vorgestellt. 
 \end{abstract}
 
 \tableofcontents
@@ -20,9 +20,13 @@ abstract
 
 \section{Einleitung}
 
-Mit Hilfe einer Eigennamenerkennung ist es möglich Eigennamen in Texten zu finden. Es könnte beispielsweise interessant sein alle Personennamen in einem Text zu finden, um schnell herauszufinden, um wen es in diesem Text geht. Unterschiedliche Domänen haben meist auch unterschiedliche Eigennamen. In den einzelnen Domänen, wie z.B. die Mathematik, entstehen Eigennamen auf unterschiedliche Weisen. Wenn beispielsweise ein bekannter Mathematiker einen neuen Algorithmus entwickelt, so wird dieser oft nach dem Namen des Mathematikers benannt. Jedoch gibt es in den meisten Fällen keine eindeutigen Regeln, nach welchen Eigennamen entstehen und es ist somit nicht trivial diese Eigennamen in Texten zu finden. Eine Eigennamenerkennung aus einer bestimmten Domäne (z.B. die Biologie), funktioniert vermutlich auch nicht problemlos in einer anderen Domäne.\\
+Eigennamenerkennung ist Bestandteil des Gebiets der Informationsextraktion und macht es möglich Entitäten wie Personen, Organisationen und Ortsnamen in unstrukturierten Texten zu erkennen. Die Erkennung der Eigennamen erhöht dabei den Nützlichkeit der Texte erheblich \cite[1]{bunescu2007learning}.
+Mit Hilfe von Eigennamenerkennung ist es möglich ähnliche Texte zu Textclustern zu gruppieren \cite[139]{sekine2009named} oder Texte mit enzyklopädischem Wissen zu verlinken. \\
 
-Es gibt schon verschiedene Eigennamenerkennungen in unterschiedlichen Domänen. Jedoch gibt es auch einige Domänen, für welche es noch keine bzw. nur ungenügend zufriedenstellende Eigennamenerkennungen gibt. Eine Domäne für welche es noch keine zufriedenstellende Eigennamenerkennung gibt, ist die Mathematik, mit welcher sich dieser Artikel beschäftigt.
+Obwohl es bereits Ansätze für allgemeine Named Entity Recognition gibt, die über Sprachdomänen hinaus und sogar mit unterschiedlichen Sprachen funktionieren \cite{shared-ner} können mit Domänen- und Sprachspezifischen Eigennamenerkennungs-Methoden meißt bessere Ergebnisse erzielt werden.
+Auf eine Domäne spezialisierte Verfahren sind zudem in der Lage die domänenspezifischen Eigennamen zu klassifizieren. Beispielsweise gibt es im Bereich der Biologie bereits Systeme zur Eigennamenerkennung von Proteinnamen oder chemischen Termen \cite{altman2002pacific}. Eine domainenspezifisches System zur Eigennamenerkennung, funktioniert allerdings auch nur bedinngt in einer anderen Domäne.\\
+
+Eine Sprachdomäne für welche es noch keine zufriedenstellende Eigennamenerkennung gibt, ist die Mathematik, mit welcher sich dieser Artikel beschäftigt.
 
 \newpage
 \section{Grundlagen}
@@ -98,6 +102,8 @@ Für das Annotieren der Trainingsdaten wurde das Stanford Annotation Tool\footnot
 \subsection{Datensatz}
 Als Datensatz für die Evaluation und das Trainieren des maschinellen Lernens wurden Abstracts aus dem Arxiv.org-Datensatz\footnote{http://arxiv.org/} verwendet. Der Datensatz enthält Abstarcts aus den Themen Physik, Mathematik, Computer Science, Quantitative Biology, Quantitative Finance und Statistik. Für diese Arbeit wurden lediglich die Abstrakts verwendet, deren Thema in die Mathematik fällt. Der Arxiv Datensatz enthielt zum Zeitpunkt des Verfassens dieser Arbeit 145.800 Abstracts aus der Mathematik. Als Datenquelle wurde die XML-Version des Datensatzes verwendet.
 \subsection{Architektur}
+\label{arch}
+Im folgenden wird die Architektur der Evaluationsumgebung beschrieben\footnote{Das in der Arbeit beschriebene System ist unter https://github.com/andreasknoepfle/math-ner verfügbar.}.
 Zur Zwischenspeicherung der Abstarcts mit verschiedenen Annotationen verwendet die Implementierung die dokumentorientierte Datenbank MongoDB\footnote{http://www.mongodb.org/}. Jeweils ein MongoDB-Dokument enthält das Abstract in Rohform, die manuell annotierte Version des Abstracts (falls vorhanden) und das Ergebnis des Regelbasierten Verfahrens. 
 \begin{figure}[ht!]
   \begin{center}
@@ -109,6 +115,9 @@ Abbildung \ref{arch} zeigt die grundsätzliche Architektur der Evaluationsumgebun
 Zur Evaluierung der Verfahren wird das Perl-Skript ''colleval''\footnote{http://www.cnts.ua.ac.be/conll2000/chunking/conlleval.txt} verwendet. Dies erwartet ebenfalls ein TSV-Format, allerdings mit zwei Labeln pro Zeile (erwartetes Label und erkanntes Label). Diese Konvertierung kann durch das hier in der Abbildung als ''Eval'' bezeichnete Modul ausgeführt werden und verbindet die manuell annotierten Daten mit den Ergebnissen aus den jeweiligen Verfahren. \\
 
 \subsection{Evaluationsmethoden}
+In Abbildung \ref{eval} ist der Prozess der Evaluation der Verfahren, des annotierens der Abstrakts und des trainieren des Korpus für das maschinelle Lernen vereinfacht dargestellt. Um die Evaluationsergebnisse des regelbasierten Verfahrens nicht zu verfälschen wurde das manuelle Annotieren der Abstracts, die zur Evaluation dieses Verfahrens benötigt werden, nur von einer externen, nicht am Entwickeln des Verfahrens beteiligten Person (in der Abbildung als ''Extern'' gekennzeichnet), durchgeführt.\\ 
+Für das Trainieren des Korpus für das maschinelle Lernen wurden die Hälfte der manuell annotierten Daten verwendet. Die andere Hälfte wurde zur Evaluation dieses Verfahrens verwendet.   
+
 \begin{figure}[ht!]
   \begin{center}
   	\includegraphics[width=1.0\textwidth]{image/eval.jpg}
@@ -116,19 +125,19 @@ Zur Evaluierung der Verfahren wird das Perl-Skript ''colleval''\footnote{http://
   \end{center}
 \end{figure}
 
-
-Für die Evaluation der Ergebnisse werden drei Maße verwendet:
-
-\(Precision = \frac{Anzahl richtig getaggte Woerter}{Anzahl getaggte Woerter}\) 
-
-\(Recall = \frac{Anzahl richtig getaggte Woerter}{Anzahl richtig getaggte Woerter + Anzahl nicht gefundene Woerter}\) 
-
-\(F1 = 2 \cdot \frac{Precision \cdot Recall}{Precision + Recall}\)
+\newpage
+Für die Evaluation der Ergebnisse werden drei Maße verwendet, die durch das bereits in Abschnitt \ref{arch} eingeführte colleval-Skript berechnet werden :
+\vspace*{1cm}\\
+$\mbox{Precision} = \frac{\mbox{Anzahl richtig getaggte Wörter}}{\mbox{Anzahl getaggte Wörter}}$
+\vspace*{1cm}\\
+$\mbox{Recall} = \frac{\mbox{Anzahl richtig getaggte Wörter}}{\mbox{Anzahl richtig getaggte Woerter} + \mbox{Anzahl nicht gefundene Wörter}}$ 
+\vspace*{1cm}\\
+$\mbox{FB1} = 2 \cdot \frac{\mbox{Precision} \cdot \mbox{Recall}}{\mbox{Precision} + \mbox{Recall}}$
 
 
 
 \section{Analyse}
-
+Folgender Abschnitt enthält die Ergebnisse der Evaluation beider Verfahren und Beispiele von durch die jeweiligen Verfahren nicht erkannten und falsch erkannten Eigennamen. Dabei sind für die nicht erkannten Eigennamen die nicht erkannten Teile {\color{red}rot} und die richtig erkannten Teile {\color{OliveGreen}grün} dargestellt. Für die falsch erkannten Eigennamen sind die falsch erkannten Teile {\color{red}rot} und die richtig erkannten Teile {\color{OliveGreen}grün} dargestellt.
 \subsection{Ergebnisse der Regelbasierte Erkennung}
 
 Mit der Implementierung der regelbasierten Erkennung wurden folgende Ergebnisse erzielt:
@@ -162,13 +171,13 @@ Folgende Details liegen diesem Ergebnis zu grunde:
 
 \subsubsection*{Falsch erkannte Eigennamen}
 
-(...) of {\color{red}generically-unconventional} {\color{green}Virasoro generators}    (...)
+(...) of {\color{red}generically-unconventional} {\color{OliveGreen}Virasoro generators}    (...)
 
 (...) again by {\color{red}Justin Roberts} as problem 12.18 in    (...)   
 
-(...) on the {\color{red}second} {\color{green}Minkowski inequality} (...)   
+(...) on the {\color{red}second} {\color{OliveGreen}Minkowski inequality} (...)   
 
-(... ) {\color{red}2-arc-transitive, arc-transitive and semisymmetric} {\color{green}Levi graphs} (...)
+(... ) {\color{red}2-arc-transitive, arc-transitive and semisymmetric} {\color{OliveGreen}Levi graphs} (...)
 
 (...) with the {\color{red}Directed Acyclic Graphs} (...)
 
@@ -200,19 +209,19 @@ There are 7622 isomorphism classes of smooth {\color{red}Fano polytopes} and 722
 
 (...) for the affine {\color{red}Weyl group symmetry}.   
 
-(...) of equivariant {\color{green}Schubert classes} on {\color{red}Grassmannians} which implies(...)
+(...) of equivariant {\color{OliveGreen}Schubert classes} on {\color{red}Grassmannians} which implies(...)
 
-(...) of the Fourier coefficients of {\color{green}Siegel modular} {\color{red}forms} on {\color{red}Maass Space} are obtained (...)
+(...) of the Fourier coefficients of {\color{OliveGreen}Siegel modular} {\color{red}forms} on {\color{red}Maass Space} are obtained (...)
 
-(...) modeling a {\color{green}Non-Newtonian fluid} {\color{red}of polymer aqueous solutions}.
+(...) modeling a {\color{OliveGreen}Non-Newtonian fluid} {\color{red}of polymer aqueous solutions}.
 
 (...) recall a {\color{red}theorem of Cantor} that (...) 
 
 \subsubsection*{Falsch erkannte Eigennamen}
 
-(...) the dual {\color{green}Feynman transform} {\color{red}whose algebras} are not necessarily (...)
+(...) the dual {\color{OliveGreen}Feynman transform} {\color{red}whose algebras} are not necessarily (...)
 
-(...) where {\color{green}Mathai's entropy} {\color{red}leads} to pathway (...)
+(...) where {\color{OliveGreen}Mathai's entropy} {\color{red}leads} to pathway (...)
 
 (...) pricing continuous arithmetic average {\color{red}Asian options} in the (...)
 
@@ -221,6 +230,25 @@ There are 7622 isomorphism classes of smooth {\color{red}Fano polytopes} and 722
 (...) Food scientists at the {\color{red}U.S. Army's Natick Solider Center have} developed a model (...)
 
 \section{Fazit}
+Beide Verfahren erreichen bereits hohe Precision-Maße und das Recall-Maß ist in beiden Verfahren ebenfalls weit über 50\%, obwohl beide Verfahren noch Spielraum für Optimierungen bieten.
+\subsection{Fazit regelbasierte Erkennung}
+\label{fazitreg}
+Das regelbasierte Verfahren hat mit über 95\% bereits eine sehr hohe Präzision und erkannte Begriffe sind sehr selten falsch erkannt.
+Allerdings können kleingeschriebene Eigennamen noch nicht erkannt werden. Dies könnte durch eine Mischung des bisherigen Verfahren mit Schlüsselwörterlisten von Mathematischen Konzepten nachgerüstet werden.
+Das Verfahren annotiert zusätzliche Adjektive, die nicht zum Eigennamen gehören. Dies könnte durch hinzuziehen der Informationen aus dem Parsebaum des ''Lexical Parser'' ebenfalls behoben werden (ähnlich wie Artikel). \\
+Der ''Lexical Parser'' führt zudem einen großen Rechenaufwand ein, durch die das Verfahren deutlich langsamer als die Erkennung durch maschinelles Lernen  wird. \\
+Zudem ist eine Unterscheidung von mathematische Eigennamen und Personen-Eigennamen nicht einfach möglich, wenn kein zusätzliches Schlüsselwort im Text den mathematischen Eigennamen begleitet.
+\subsection{Fazit maschinelles Lernen}
+Diese Methode erkennt auch kleingeschriebene Eigennamen. Allerdings werden oft den Eigennamen nachfolgende Wörter mit annotiert.
+Allerding erkennt das Verfahren auch Eigennamen aus anderen Sprach-Domainen die z.B. in der Einleitung der Texte vorkommen können.
+Darüber hinaus konnte man feststellen, das sich das Verfahren mit zunehmender Menge an annotierten Trainingsdaten immer weiter verbessert hat.
+\subsection{Erweiterungen und Ausblick}
+Mit den bereits im Abschnitt \ref {fazitreg} erwähnten Verbesserungen des regelbasierten Verfahrens und weiteren Regulären Ausdrücken lässt sich dieses Verfahren noch weiter verbesseren. Ebenso könnte durch Anpassungen der Einstellungen am Stanford NER und einer größeren Menge von Trainingsdaten auch das Verfahren mit maschinellem Lernen Verbessert werden.\\
+Weiterhin könnte durch Kombination beider Verfahren ein Hybrides Verfahren eventuell mehr leisten.
+
+
+\bibliography{sources}
+
 
 \end{document}
 
