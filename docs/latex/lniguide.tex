@@ -20,11 +20,11 @@ In dieser Arbeit werden zwei verschiedene Ansätze für die Erkennung von Eigennam
 
 \section{Einleitung}
 
-Eigennamenerkennung ist Bestandteil des Gebiets der Informationsextraktion und macht es möglich Entitäten wie Personen, Organisationen und Ortsnamen in unstrukturierten Texten zu erkennen. Die Erkennung der Eigennamen erhöht dabei den Nützlichkeit der Texte erheblich \cite[1]{bunescu2007learning}.
+Eigennamenerkennung ist Bestandteil des Gebiets der Informationsextraktion und macht es möglich Entitäten wie Personen, Organisationen und Ortsnamen in unstrukturierten Texten zu erkennen. Die Erkennung der Eigennamen erhöht dabei die Nützlichkeit der Texte erheblich \cite[1]{bunescu2007learning}.
 Mit Hilfe von Eigennamenerkennung ist es möglich ähnliche Texte zu Textclustern zu gruppieren \cite[139]{sekine2009named} oder Texte mit enzyklopädischem Wissen zu verlinken. \\
 
 Obwohl es bereits Ansätze für allgemeine Named Entity Recognition gibt, die über Sprachdomänen hinaus und sogar mit unterschiedlichen Sprachen funktionieren \cite{shared-ner} können mit Domänen- und Sprachspezifischen Eigennamenerkennungs-Methoden meißt bessere Ergebnisse erzielt werden.
-Auf eine Domäne spezialisierte Verfahren sind zudem in der Lage die domänenspezifischen Eigennamen zu klassifizieren. Beispielsweise gibt es im Bereich der Biologie bereits Systeme zur Eigennamenerkennung von Proteinnamen oder chemischen Termen \cite{altman2002pacific}. Eine domainenspezifisches System zur Eigennamenerkennung, funktioniert allerdings auch nur bedinngt in einer anderen Domäne.\\
+Auf eine Domäne spezialisierte Verfahren sind zudem in der Lage die domänenspezifischen Eigennamen zu klassifizieren. Beispielsweise gibt es im Bereich der Biologie bereits Systeme zur Eigennamenerkennung von Proteinnamen oder chemischen Termen \cite{altman2002pacific}. Ein domainenspezifisches System zur Eigennamenerkennung, funktioniert allerdings auch nur bedinngt in einer anderen Domäne.\\
 
 Eine Sprachdomäne für welche es noch keine zufriedenstellende Eigennamenerkennung gibt, ist die Mathematik, mit welcher sich dieser Artikel beschäftigt.
 
@@ -75,10 +75,10 @@ Bestehende Werkzeuge zur Eigennamenerkennung können zusätzlich zur eigentlichen 
 \end{figure}
 \normalsize
 
-Das Erkennen der Eigennamen über reguläre Ausdrücken über einen längeren Text erfordert Satzbasierte Ausdrücke, die zusätzlich die Grammatik des Satzes einbeziehen. Dies führt zu sehr komplexen regulären Ausdrücken und erschwert das Erkennen der Eigennamen zusätzlich. Da Eigennamen immer nur in Nominalphrasen vorkommen, können die regulären Ausdrücke durch Vorverarbeitung des Textes wesentlich vereinfacht werden. Dazu wurde in dieser Arbeit der "Lexical Parser" der Stanford Natural Language Processing Group\footnote{http://nlp.stanford.edu/software/lex-parser.shtml} verwendet. 
+Das Erkennen der Eigennamen über reguläre Ausdrücke über einen längeren Text erfordert Satzbasierte Ausdrücke, die zusätzlich die Grammatik des Satzes einbeziehen. Dies führt zu sehr komplexen regulären Ausdrücken und erschwert das Erkennen der Eigennamen zusätzlich. Da Eigennamen immer nur in Nominalphrasen vorkommen, können die regulären Ausdrücke durch Vorverarbeitung des Textes wesentlich vereinfacht werden. Dazu wurde in dieser Arbeit der ''Lexical Parser'' der Stanford Natural Language Processing Group\footnote{http://nlp.stanford.edu/software/lex-parser.shtml} verwendet. 
 \\
 Dieser Parser baut einen Parse-Baum auf, der die syntaktische Struktur des eingegebenen Textes analysiert und den Text entsprechend annotiert. Dabei werden jedes Wort, zusammengehörige Wortgruppen und Satzteile annotiert. 
-Abbildung \ref{penn} zeigt einen Beispielsatz der mit dem "Lexical Parser" analysiert und im Penn-Treebank Format\footnote{http://www.cis.upenn.edu/~treebank/} ausgegeben wurde.
+Abbildung \ref{penn} zeigt einen Beispielsatz der mit dem ''Lexical Parser'' analysiert und im Penn-Treebank Format\footnote{http://www.cis.upenn.edu/~treebank/} ausgegeben wurde.
 
 Im Beispiel sind mehrere Nominalphrasen, wobei der Ausdruck  
 \small
@@ -91,7 +91,7 @@ Die regulären Ausdrücke sind dabei sehr einfach aufgebaut und suchen nach großge
 \subsection{Erkennung mit maschinellem Lernen}
 \label{mach-lern}
 Für die Erkennung von mathematischen Eigennamen mit maschinellem Lernen wurde die Stanford Named Entity Recognition der Stanford Natural Language Processing Group\footnote{http://nlp.stanford.edu/ner/index.shtml} verwendet. \\
-Bevor die mathematische Eigennamen erkannt werden können muss zunächst ein so genannter Korpus trainiert werden. Dafür benötigt man eine große Menge bereits von Textdaten mit annotierten Eigennamen. Mit einem Korpus der auf diese Weise trainiert wurde kann man anschließen auch neue Texte annotieren. \\
+Bevor die mathematische Eigennamen erkannt werden können, muss zunächst ein so genannter Korpus trainiert werden. Dafür benötigt man eine große Menge von Textdaten mit annotierten Eigennamen. Mit einem Korpus der auf diese Weise trainiert wurde kann man anschließen auch neue Texte annotieren. \\
 \begin{figure}[ht!]
   \begin{center}
   	\includegraphics[width=0.7\textwidth]{image/annotate.jpg}
@@ -236,7 +236,7 @@ Beide Verfahren erreichen bereits hohe Precision-Maße und das Recall-Maß ist in 
 Das regelbasierte Verfahren hat mit über 95\% bereits eine sehr hohe Präzision und erkannte Begriffe sind sehr selten falsch erkannt.
 Allerdings können kleingeschriebene Eigennamen noch nicht erkannt werden. Dies könnte durch eine Mischung des bisherigen Verfahren mit Schlüsselwörterlisten von Mathematischen Konzepten nachgerüstet werden.
 Das Verfahren annotiert zusätzliche Adjektive, die nicht zum Eigennamen gehören. Dies könnte durch hinzuziehen der Informationen aus dem Parsebaum des ''Lexical Parser'' ebenfalls behoben werden (ähnlich wie Artikel). \\
-Der ''Lexical Parser'' führt zudem einen großen Rechenaufwand ein, durch die das Verfahren deutlich langsamer als die Erkennung durch maschinelles Lernen  wird. \\
+Der ''Lexical Parser'' führt zudem einen großen Rechenaufwand ein, durch was das Verfahren deutlich langsamer als die Erkennung durch maschinelles Lernen  wird. \\
 Zudem ist eine Unterscheidung von mathematische Eigennamen und Personen-Eigennamen nicht einfach möglich, wenn kein zusätzliches Schlüsselwort im Text den mathematischen Eigennamen begleitet.
 \subsection{Fazit maschinelles Lernen}
 Diese Methode erkennt auch kleingeschriebene Eigennamen. Allerdings werden oft den Eigennamen nachfolgende Wörter mit annotiert.
